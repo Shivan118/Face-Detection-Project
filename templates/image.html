@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Face Detection Application</title>
+    <link rel="stylesheet" href="image.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <style>
+      /* Add your CSS styles here */
+      .main_full {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      .panel {
+        text-align: center;
+      }
+      .button_outer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .btn_upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .processing_bar {
+        width: 100%;
+        height: 10px;
+        background-color: #007BFF;
+        margin-top: 10px;
+      }
+      .success_box {
+        display: none;
+        color: #28A745;
+        margin-top: 10px;
+      }
+      .error_msg {
+        color: #DC3545;
+        text-align: center;
+      }
+      .uploaded_file_view {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .file_remove {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="main_full">
+      <div class="container">
+        <div class="panel">
+          <div class="button_outer">
+            <div class="btn_upload">
+              <form method="post" enctype="multipart/form-data">
+                <input type="file" id="upload_file" name="file" onchange="showImage()">
+                Upload Image
+              </form>
+            </div>
+            <div class="processing_bar"></div>
+            <div class="success_box"></div>
+          </div>
+        </div>
+        <div class="error_msg"></div>
+        <div class="uploaded_file_view" id="uploaded_view">
+          <span class="file_remove">X</span>
+          <img id="uploaded_image" src="" alt="Uploaded Image" style="max-width: 100%; max-height: 300px; display: none;">
+        </div>
+      </div>
+      <div class="text-center">
+        <input type="button" onclick="send_data()" value="Detect Face" class="btn btn-primary">
+        <a type="button" class="btn btn-primary" href="/">Go Back</a>
+      </div>
+    </main>
+
+    <script>
+        var btnUpload = $("#upload_file"),
+          btnOuter = $(".button_outer");
+        btnUpload.on("change", function (e) {
+          var ext = btnUpload.val().split('.').pop().toLowerCase();
+          if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+            $(".error_msg").text("Not an Image...");
+          } else {
+            $(".error_msg").text("");
+            btnOuter.addClass("file_uploading");
+            setTimeout(function () {
+              btnOuter.addClass("file_uploaded");
+            }, 3000);
+            var uploadedFile = URL.createObjectURL(e.target.files[0]);
+            setTimeout(function () {
+              $("#uploaded_view").append('<img src="' + uploadedFile + '" />').addClass("show");
+            }, 3500);
+          }
+        });
+        $(".file_remove").on("click", function (e) {
+          $("#uploaded_view").removeClass("show");
+          $("#uploaded_view").find("img").remove();
+          btnOuter.removeClass("file_uploading");
+          btnOuter.removeClass("file_uploaded");
+        });
+  
+        function form_handler(event) {
+          event.preventDefault();
+        }
+        function send_data() {
+          document.querySelector('form').addEventListener('submit', form_handler);
+          var fd = new FormData(document.querySelector('form'));
+          console.log(fd)
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/image', true);
+          xhr.onload = function () {};
+          xhr.send(fd);
+        }
+  
+        function showImage() {
+            var imgElement = document.getElementById("uploaded_image");
+            var btnUpload = document.getElementById("upload_file");
+            var uploadedView = document.getElementById("uploaded_view");
+
+            imgElement.style.display = "none"; // Hide the image initially
+
+            if (btnUpload.files && btnUpload.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                imgElement.src = e.target.result;
+                imgElement.style.display = "block"; // Show the image
+            };
+
+            reader.readAsDataURL(btnUpload.files[0]);
+            uploadedView.style.display = "block";
+            } else {
+            imgElement.src = "";
+            uploadedView.style.display = "none";
+            }
+        }
+    </script>
+  </body>
+</html>
